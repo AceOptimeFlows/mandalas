@@ -5,7 +5,7 @@
    - Detecta móvil/tablet por UA + touch + media queries.
    - Muestra overlay accesible.
    - i18n según idioma del navegador (es/en/pt-BR/de/fr/it/ko/ja/zh/hi/ru/ar).
-   - Permite continuar (warning) o ir a la web.
+   - Bloquea el acceso en móvil/tablet y solo permite ir a la web.
    ========================================================= */
 
 (() => {
@@ -16,8 +16,8 @@
   // Si pulsas “Abrir web”, irá aquí:
   const REDIRECT_URL = 'https://optimeflows-site.vercel.app';
 
-  // Si quieres “bloquear” (sin botón continuar), ponlo a false:
-  const ALLOW_CONTINUE_ANYWAY = true;
+  // Bloqueado: NO mostrar botón de continuar
+  const ALLOW_CONTINUE_ANYWAY = false;
 
   // Si añades ?desktop=1 a la URL, NO muestra el aviso (útil para pruebas)
   const BYPASS_QUERY_PARAM = 'desktop';
@@ -216,6 +216,8 @@
   }
 
   function wasDismissed(){
+    // Si no se permite continuar, ignoramos cualquier dismiss antiguo
+    if(!ALLOW_CONTINUE_ANYWAY) return false;
     try{
       return localStorage.getItem(STORAGE_KEY) === '1';
     }catch(_){
@@ -224,6 +226,7 @@
   }
 
   function markDismissed(){
+    if(!ALLOW_CONTINUE_ANYWAY) return;
     try{
       localStorage.setItem(STORAGE_KEY, '1');
     }catch(_){}
@@ -368,7 +371,7 @@ body.desktop-only-open{
     UI.btnContinue = btnContinue;
     UI.btnWeb = btnWeb;
 
-    // Esc cierra (si hay “continuar”)
+    // Esc cierra solo si existe opción de continuar
     window.addEventListener('keydown', (ev) => {
       if(!UI.overlay) return;
       if(UI.overlay.getAttribute('aria-hidden') !== 'false') return;
@@ -427,7 +430,7 @@ body.desktop-only-open{
 
   function maybeShow(){
     if(shouldBypass()) return;
-    if(wasDismissed()) return;
+    if(ALLOW_CONTINUE_ANYWAY && wasDismissed()) return;
     if(!isProbablyMobileOrTablet()) return;
 
     showOverlay();

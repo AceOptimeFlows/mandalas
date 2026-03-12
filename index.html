@@ -5,25 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <title>Mand△L@s • Creador de Mandalas • PWA</title>
-  <meta name="description" content="Mand△L@s — Creador interactivo de mandalas con simetría radial, capas, exportación PNG/SVG/PDF, galería 5×N y Creador de Libros (PDF multipágina). Todo en tu navegador como PWA." />
-  <!-- Un solo theme-color, consistente con el manifest -->
+  <meta
+    name="description"
+    content="Mand△L@s — Creador interactivo de mandalas con simetría radial, capas, exportación PNG/SVG/PDF, galería 5×N y Creador de Libros (PDF multipágina). Todo en tu navegador como PWA."
+  />
   <meta name="theme-color" content="#0b1220" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-capable" content="yes" />
 
   <link rel="manifest" href="./manifest.webmanifest" />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128'%3E%3Crect width='100%25' height='100%25' rx='24' fill='%230ea5e9'/%3E%3Ctext x='50%25' y='58%25' text-anchor='middle' font-size='96' font-weight='800' fill='white'%3E%E2%96%B3%3C/text%3E%3C/svg%3E" />
+
+  <!-- Iconos reales -->
+  <link rel="icon" type="image/png" sizes="192x192" href="./assets/img/logomandalas192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="./assets/img/logomandalas512.png" />
+  <link rel="apple-touch-icon" href="./assets/img/logomandalas192.png" />
 
   <!-- Base styles -->
   <link rel="stylesheet" href="./styles.css" />
-  <!-- ✅ Shell OptimeFlow(s): header + footer como la app de referencia -->
   <link rel="stylesheet" href="./shell-optime.css" />
 
-  <!-- ✅ Desktop-only guard (aviso móvil/tablet) -->
+  <!-- Desktop-only guard -->
   <script src="./desktop-guard.js" defer></script>
-
 </head>
-
 <body>
   <noscript>Esta aplicación requiere JavaScript para funcionar.</noscript>
 

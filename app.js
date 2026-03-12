@@ -4326,10 +4326,62 @@ var router = null;
 })();
 
 
-  /* ===== SW en https ===== */
-  if('serviceWorker' in navigator && location.protocol==='https:' && !/(localhost|127\.0\.0\.1)/.test(location.hostname)){
-    fetch('./sw.js',{method:'HEAD'}).then(function(r){ if(r.ok) navigator.serviceWorker.register('./sw.js')["catch"](function(){}); })["catch"](function(){});
-  }
+   /* ===== SW (https o localhost, sin HEAD) ===== */
+  (function registerServiceWorker(){
+    var isLocalhost = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+    var canUseSW = ('serviceWorker' in navigator) &&
+      (location.protocol === 'https:' || isLocalhost);
+
+    if(!canUseSW) return;
+
+    var swUrl = './sw.js';
+    var hadController = !!navigator.serviceWorker.controller;
+    var refreshing = false;
+
+    navigator.serviceWorker.addEventListener('controllerchange', function(){
+      // Recarga solo en actualizaciones, no en la primera instalación
+      if(!hadController || refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    });
+
+    function wireRegistration(reg){
+      if(!reg) return;
+
+      // Si ya hay una nueva versión esperando, actívala
+      if(reg.waiting && hadController){
+        try{ reg.waiting.postMessage({ type:'SKIP_WAITING' }); }catch(_){}
+      }
+
+      reg.addEventListener('updatefound', function(){
+        var installing = reg.installing;
+        if(!installing) return;
+
+        installing.addEventListener('statechange', function(){
+          // Nueva versión instalada mientras la app estaba abierta
+          if(installing.state === 'installed' && hadController){
+            try{
+              if(reg.waiting) reg.waiting.postMessage({ type:'SKIP_WAITING' });
+            }catch(_){}
+          }
+        });
+      });
+
+      // Pide comprobación de actualización al registrar
+      try{ reg.update(); }catch(_){}
+    }
+
+    window.addEventListener('load', function(){
+      navigator.serviceWorker
+        .register(swUrl, { scope:'./' })
+        .then(function(reg){
+          wireRegistration(reg);
+        })
+        ["catch"](function(err){
+          console.warn('SW registration failed:', err);
+        });
+    });
+  })();
 
   /* ===== MIT & Privacidad ===== */
 (function MIT_and_Privacy(){
