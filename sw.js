@@ -1,7 +1,7 @@
 // sw.js — PWA offline fuerte para OptimeFlow(s) Mand△L@s
 
 const APP_PREFIX  = 'mandalas';
-const APP_VERSION = 'v.1.1-offline';
+const APP_VERSION = 'v.1.0';
 const APP_CACHE   = `${APP_PREFIX}-app-${APP_VERSION}`;
 const IMG_CACHE   = `${APP_PREFIX}-img-${APP_VERSION}`;
 const OTHER_CACHE = `${APP_PREFIX}-rt-${APP_VERSION}`;
@@ -42,14 +42,6 @@ const CORE_ASSETS = [
 const IMG_CACHE_MAX_ENTRIES = 80;
 const HTML_NETWORK_TIMEOUT  = 3500;
 
-// Alias útiles: tu i18n pide zh-CN / ja-JP, pero en disco tienes zh.json / ja.json
-const ALIAS_MAP = {
-  '/lang/zh-CN.json': './lang/zh.json',
-  '/lang/zh-cn.json': './lang/zh.json',
-  '/lang/ja-JP.json': './lang/ja.json',
-  '/lang/ja-jp.json': './lang/ja.json'
-};
-
 function toAbsolute(url){
   return new URL(url, self.location).href;
 }
@@ -64,9 +56,23 @@ function sameOrigin(url){
 
 function getAliasAbsolute(url){
   try{
-    const pathname = new URL(url, self.location).pathname;
-    const alias = ALIAS_MAP[pathname];
-    return alias ? toAbsolute(alias) : null;
+    var pathname = new URL(url, self.location).pathname;
+
+    if(
+      pathname.endsWith('/lang/zh-CN.json') ||
+      pathname.endsWith('/lang/zh-cn.json')
+    ){
+      return toAbsolute('./lang/zh.json');
+    }
+
+    if(
+      pathname.endsWith('/lang/ja-JP.json') ||
+      pathname.endsWith('/lang/ja-jp.json')
+    ){
+      return toAbsolute('./lang/ja.json');
+    }
+
+    return null;
   }catch(_){
     return null;
   }
