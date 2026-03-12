@@ -1010,102 +1010,170 @@ var selectionScales = {};          // id -> factor (0.25, 0.5, 0.75, 1)
   function hideNotice(){
     var n = $('#studioImportNotice'); if(n && n.parentNode) n.parentNode.removeChild(n);
   }
+  function getSavedCentersUVForItem(item){
+    var c = (item && item.center) || {};
+    var pts = Array.isArray(c.points) ? c.points : [];
+
+    if(c.mode === 'centrado' || !pts.length){
+      return [{u:0.5, v:0.5}];
+    }
+
+    var active = c.active || { mode:'all', index:0 };
+
+    if(active.mode === 'choose'){
+      var idx = clamp(parseInt(active.index || 0, 10), 0, Math.max(0, pts.length - 1));
+      return [{u: pts[idx].u, v: pts[idx].v}];
+    }
+
+    return pts.map(function(p){
+      return {u:p.u, v:p.v};
+    });
+  }
+
+  function getStrokeSourceCentersUV(stroke, item){
+    if(stroke && stroke.centersUV && stroke.centersUV.length){
+      return stroke.centersUV.map(function(c){
+        return {u:c.u, v:c.v};
+      });
+    }
+    return getSavedCentersUVForItem(item);
+  }
+
+  function getImportAnchorUV(item){
+    var doc = (item && item.doc) || {};
+    var minU = Infinity, minV = Infinity, maxU = -Infinity, maxV = -Infinity;
+    var found = false;
+
+    function add(u, v){
+      if(!isFinite(u) || !isFinite(v)) return;
+      if(u < minU) minU = u;
+      if(v < minV) minV = v;
+      if(u > maxU) maxU = u;
+      if(v > maxV) maxV = v;
+      found = true;
+    }
+
+    try{
+      (doc.layers || []).forEach(function(L){
+        (L.strokes || []).forEach(function(s){
+          (s.points || []).forEach(function(p){
+            add(p.u, p.v);
+          });
+
+          getStrokeSourceCentersUV(s, item).forEach(function(c){
+            add(c.u, c.v);
+          });
+        });
+      });
+    }catch(_){}
+
+    if(!found){
+      getSavedCentersUVForItem(item).forEach(function(c){
+        add(c.u, c.v);
+      });
+    }
+
+    if(!found){
+      return {u:0.5, v:0.5};
+    }
+
+    return {
+      u: (minU + maxU) / 2,
+      v: (minV + maxV) / 2
+    };
+  }
+
+  function mapPointFromAnchor(pt, fromAnchor, toAnchor, factor){
+    factor = (factor == null ? 1 : factor);
+    return {
+      u: toAnchor.u + factor * (pt.u - fromAnchor.u),
+      v: toAnchor.v + factor * (pt.v - fromAnchor.v)
+    };
+  }
 
   // Importa las entradas seleccionadas centradas en (u,v) del lienzo de Studio.
   function importSelectionAt(u, v){
-  var base = state.studioDoc || { layers:[], activeLayer:0 };
-  state.studioDoc = base;                   // Studio compone en su propio doc
-  var addedLayers = 0;
+    var base = state.studioDoc || { layers:[], activeLayer:0 };
+    state.studioDoc = base;
+    var addedLayers = 0;
 
-  // ——— helper: baricentro de centros; si no hay, de puntos; si no, (0.5,0.5)
-  function docAnchorUV(doc){
-    var su=0, sv=0, n=0;
-    try{
-      (doc.layers||[]).forEach(function(L){
-        (L.strokes||[]).forEach(function(st){
-          if(st.centersUV && st.centersUV.length){
-            st.centersUV.forEach(function(c){ su+=c.u; sv+=c.v; n++; });
+    var target = { u:u, v:v };
+
+    selectionIds.forEach(function(id){
+      var it = (state.gallery || []).find(function(g){ return g.id === id; });
+      if(!it || !it.doc || !it.doc.layers) return;
+
+      var factor    = (selectionScales && selectionScales[id] != null) ? selectionScales[id] : 1;
+      var anchorUV  = getImportAnchorUV(it);
+      var groupId   = uid();
+      var groupName = it.name || 'Mandala';
+
+      var srcLayers = it.doc.layers || [];
+      for(var i=0; i<srcLayers.length; i++){
+        var SL = srcLayers[i];
+        var newL = {
+          id: uid(),
+          name: (it.name || 'Obra') + ' • ' + (SL.name || ('Capa ' + (i+1))),
+          visible: true,
+          outlineUnion: !!SL.outlineUnion,
+          strokes: [],
+          rotEnabled: !!SL.rotEnabled,
+          rotSpeed: SL.rotSpeed || 8,
+          rotDir: SL.rotDir || 1,
+          rotAngle: SL.rotAngle || 0,
+          groupId: groupId,
+          groupName: groupName
+        };
+
+        var ss = SL.strokes || [];
+        for(var k=0; k<ss.length; k++){
+          var orig = ss[k];
+          var s = clone(orig);
+
+          // Puntos: misma transformación rígida para conservar la geometría
+          if(s.points && s.points.length){
+            s.points = s.points.map(function(p){
+              return mapPointFromAnchor(p, anchorUV, target, factor);
+            });
           }
-        });
-      });
-    }catch(_){}
-    if(n>0) return {u:su/n, v:sv/n};
 
-    var pu=0, pv=0, m=0;
-    try{
-      (doc.layers||[]).forEach(function(L){
-        (L.strokes||[]).forEach(function(st){
-          (st.points||[]).forEach(function(p){ pu+=p.u; pv+=p.v; m++; });
-        });
-      });
-    }catch(_){}
-    if(m>0) return {u:pu/m, v:pv/m};
+          // Centros:
+          // 1) si el trazo ya trae centersUV, usamos esos
+          // 2) si no, usamos los centros guardados en item.center
+          var sourceCenters = getStrokeSourceCentersUV(orig, it);
 
-    return {u:0.5, v:0.5};
-  }
+          if(sourceCenters && sourceCenters.length){
+            s.centersUV = sourceCenters.map(function(c){
+              return mapPointFromAnchor(c, anchorUV, target, factor);
+            });
+          }else{
+            s.centersUV = [{ u: target.u, v: target.v }];
+          }
 
-  selectionIds.forEach(function(id){
-    var it = (state.gallery||[]).find(function(g){ return g.id===id; });
-    if(!it || !it.doc || !it.doc.layers) return;
+          // Mantener proporciones del trazo
+          s.size = Math.max(0.5, (orig.size || 1) * factor);
 
-    var factor   = (selectionScales && selectionScales[id]!=null) ? selectionScales[id] : 1;
-    var f = factor;
-    var A = docAnchorUV(it.doc);        // ancla de la obra importada
-    function T(pt){                     // afinidad: escala+traslada respecto a A → (u,v)
-      return { u: u + f*(pt.u - A.u), v: v + f*(pt.v - A.v) };
-    }
+          if(s.outline && s.outlineWidth != null){
+            s.outlineWidth = Math.max(1, Math.round((orig.outlineWidth || 1) * factor));
+          }
 
-    var groupId  = uid();
-    var groupName= it.name || 'Mandala';
-
-    var srcLayers = it.doc.layers || [];
-    for(var i=0;i<srcLayers.length;i++){
-      var SL = srcLayers[i];
-      var newL = {
-        id: uid(),
-        name: (it.name||'Obra')+' • '+(SL.name||('Capa '+(i+1))),
-        visible: true,
-        outlineUnion: !!SL.outlineUnion,
-        strokes: [],
-        rotEnabled: !!SL.rotEnabled, rotSpeed: SL.rotSpeed||8, rotDir: SL.rotDir||1, rotAngle: SL.rotAngle||0,
-        groupId: groupId, groupName: groupName
-      };
-
-      var ss = SL.strokes||[];
-      for(var k=0;k<ss.length;k++){
-        var orig = ss[k];
-        var s = clone(orig);
-
-        // — Escala + traslada TODOS los puntos respecto a A → (u,v)
-        if(s.points && s.points.length){
-          s.points = s.points.map(T);
+          newL.strokes.push(s);
         }
 
-        // — Escala + traslada TODOS los centros (si existen); si no, centra en (u,v)
-        if(orig.centersUV && orig.centersUV.length){
-          s.centersUV = orig.centersUV.map(T);
-        }else{
-          s.centersUV = [{u:u, v:v}];
-        }
-
-        // — Mantener proporciones en grosores
-        s.size = Math.max(0.5, (orig.size||1) * f);
-        if(s.outline && s.outlineWidth!=null){
-          s.outlineWidth = Math.max(1, Math.round((orig.outlineWidth||1) * f));
-        }
-
-        newL.strokes.push(s);
+        base.layers.push(newL);
+        addedLayers++;
       }
-      base.layers.push(newL);
-      addedLayers++;
-    }
-  });
+    });
 
-  save();
-  rebuildMoveList(); // refresca el panel “Mover”
-  toast(addedLayers ? ('Capas importadas: '+addedLayers) : 'Nada que importar.');
-}
+    studioAngles = (base.layers || []).map(function(L){
+      return (L && typeof L.rotAngle === 'number') ? L.rotAngle : 0;
+    });
 
+    save();
+    rebuildMoveList();
+
+    toast(addedLayers ? (t('Capas importadas: ') + addedLayers) : t('Nada que importar.'));
+  }
 
 function scaleStrokeAround(stroke, centerUV, factor){
   factor = (factor==null?1:factor);
