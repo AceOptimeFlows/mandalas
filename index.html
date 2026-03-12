@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Mand△L@s • Creador de Mandalas • PWA</title>
+  <meta name="description" content="Mand△L@s — Creador interactivo de mandalas con simetría radial, capas, exportación PNG/SVG/PDF, galería 5×N y Creador de Libros (PDF multipágina). Todo en tu navegador como PWA." />
+  <!-- Un solo theme-color, consistente con el manifest -->
+  <meta name="theme-color" content="#0b1220" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128'%3E%3Crect width='100%25' height='100%25' rx='24' fill='%230ea5e9'/%3E%3Ctext x='50%25' y='58%25' text-anchor='middle' font-size='96' font-weight='800' fill='white'%3E%E2%96%B3%3C/text%3E%3C/svg%3E" />
+
+  <!-- Base styles -->
+  <link rel="stylesheet" href="./styles.css" />
+  <!-- ✅ Shell OptimeFlow(s): header + footer como la app de referencia -->
+  <link rel="stylesheet" href="./shell-optime.css" />
+
+  <!-- ✅ Desktop-only guard (aviso móvil/tablet) -->
+  <script src="./desktop-guard.js" defer></script>
+
+</head>
+
+<body>
+  <noscript>Esta aplicación requiere JavaScript para funcionar.</noscript>
+
+  <!-- ===== Header OptimeFlow(s) (inspirado en la app de referencia) ===== -->
+  <header id="siteHeader" class="app-header brand-header" role="banner">
+    <div class="brand">
+
+      <div class="brand-left">
+  <a
+    href="https://www.optimeflow.com"
+    class="brand-logo-link"
+    aria-label="Ir a OptimeFlow(s)"
+    title="Ir a OptimeFlow(s)"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <img
+      id="appLogo"
+      class="brand-logo heat"
+      alt="OptimeFlow(s) logo"
+      src="assets/img/logo.png"
+    />
+  </a>
+
+  <span id="brandWord" class="brand-word brand-neon">OptimeFlow(s)</span>
+</div>
+
+      <!-- Tagline centrada con letras animadas (Mand△L@s) -->
+      <div class="brand-center">
+        <div id="tagline" class="tagline tagline-mandalas" aria-hidden="true">
+          <span class="glyph mand-core">M</span>
+          <span class="glyph mand-soft">a</span>
+          <span class="glyph mand-core">n</span>
+          <span class="glyph mand-soft">d</span>
+          <span class="glyph mand-geo wobble">△</span>
+          <span class="glyph mand-core">L</span>
+          <span class="glyph mand-at pulse">@</span>
+          <span class="glyph mand-soft">s</span>
+        </div>
+
+        <!-- Solo para accesibilidad -->
+        <span id="i-app-title" class="sr-only">Mand△L@s</span>
+      </div>
+
+      <div class="brand-right">
+        <nav class="nav" aria-label="Navegación principal">
+          <!-- OJO toggle (por defecto cerrado 🙈) -->
+          <button
+            id="viewToggle"
+            class="nav-link eye only-crear"
+            aria-pressed="false"
+            title="Ocultar/mostrar paneles (modo visualización)"
+          >🙈</button>
+
+          <!-- Paneles + Ordenar SIEMPRE a la derecha del Ojo (solo en Lienzo) -->
+          <div class="nav-menu-wrap only-crear">
+            <button
+              id="panelsMenuBtn"
+              class="nav-link square"
+              aria-haspopup="true"
+              aria-expanded="false"
+              title="Paneles"
+            >🗂️</button>
+
+            <div id="panelsMenu" class="nav-menu" role="menu" aria-labelledby="panelsMenuBtn">
+              <label class="item chk"><input type="checkbox" id="chkPanelFile"> Archivo</label>
+              <label class="item chk"><input type="checkbox" id="chkPanelAdvanced"> Contorno+Simetría</label>
+              <label class="item chk"><input type="checkbox" id="chkPanelBrush"> Pincel</label>
+            </div>
+          </div>
+
+          <button id="orderPanelsBtn" class="nav-link square only-crear" title="Ordenar paneles">⇵</button>
+
+          <!-- +Importar DEBE ir a la izquierda de “Lienzo” (solo en Studio) -->
+          <button id="studioImportBtn" class="nav-link only-studio">+Importar</button>
+
+          <!-- Secciones -->
+          <a href="#/crear" class="nav-link" data-link>Lienzo</a>
+          <a href="#/studio" class="nav-link" data-link>Studio</a>
+          <a href="#/galeria" class="nav-link" data-link>Galería</a>
+
+          <!-- Menú de Ajustes -->
+          <div class="nav-menu-wrap">
+            <button
+              id="settingsMenuBtn"
+              class="nav-link square icon-button"
+              aria-haspopup="true"
+              aria-expanded="false"
+              title="Ajustes"
+            >
+              <span class="sr-only">Ajustes</span>
+              <span class="icon-gear" aria-hidden="true"></span>
+            </button>
+
+            <div id="settingsMenu" class="nav-menu" role="menu" aria-labelledby="settingsMenuBtn">
+              <button class="item" data-action="themes" role="menuitem">🎨 Temas <span class="k">↗</span></button>
+              <button class="item" data-action="panelGlow" role="menuitem">✨ Esquinas: <b id="panelGlowState">ON</b></button>
+              <button class="item" data-action="install" role="menuitem">⬇️ Instalar</button>
+            </div>
+          </div>
+        </nav>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Área de trabajo centrada -->
+  <main id="app" class="app-shell" role="main" tabindex="-1" aria-live="polite"></main>
+
+  <!-- Avisos -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- Modal base -->
+  <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-content">
+      <h3 id="modal-title"></h3>
+      <div id="modal-body"></div>
+      <div class="modal-actions">
+        <button class="btn" id="modal-close">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Footer OptimeFlow(s) (inspirado en la app de referencia) ===== -->
+  <footer class="brand-footer" id="siteFooter" role="contentinfo">
+
+    <div class="footer-left">
+  <div class="f-left-row1">
+    <strong>OptimeFlow(s)®</strong>
+    <span class="sep">•</span>
+    <span id="footerAppName">Mand△L@s</span>
+  </div>
+
+  <div class="f-left-row2">
+    <span id="f-year">2025</span>
+    <span class="sep">•</span>
+    <a
+      id="f-author"
+      class="footer-author-link"
+      href="https://orcid.org/0009-0005-4079-7418"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Perfil ORCID de Andrés Calvo Espinosa"
+      title="ORCID de Andrés Calvo Espinosa"
+    >Andrés Calvo Espinosa</a>
+  </div>
+</div>
+
+    <!-- Centro del footer con icono (abre Coherencia Universal con checkbox) -->
+    <div class="footer-center">
+      <label
+        id="coherenciaBtn"
+        class="footer-logo-btn"
+        for="coherenciaToggle"
+        aria-label="Coherencia Universal"
+      >
+        <img
+          class="tag-logo footer-logo heat"
+          src="assets/img/logomandalas192.png"
+          alt="Mand△L@s"
+        />
+      </label>
+    </div>
+
+    <div class="footer-right">
+      <button class="btn ghost" id="licenseLink" aria-label="Licencia COF">COF</button>
+      <button class="btn ghost" id="privacyLink">Privacidad</button>
+    </div>
+
+  </footer>
+
+  <!-- Overlays -->
+  <div class="overlay" id="licenseOverlay" style="display:none">
+    <div class="box">
+      <h2 id="licenseTitle">Licencia COF</h2>
+
+      <pre id="licenseBody" class="license-text">Licencia COF
+Licencia Coherente OptimeFlow(s)
+
+Copyright © 2025 OptimeFlow(s) by Andrés Calvo Espinosa
+
+Aplicación: Mand△L@s</pre>
+
+      <div class="overlay-actions">
+        <button class="btn" id="btnCopyLicense">Copiar</button>
+        <button class="btn ghost" id="btnCloseLicense">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="privacyOverlay" style="display:none">
+    <div class="box">
+      <h2 id="privacyTitle">Política de privacidad</h2>
+
+      <div id="ppBody" class="small" style="line-height:1.55">
+        <p><b>Mand△L@s</b> se ejecuta 100% en tu navegador. No enviamos tus datos a ningún servidor.</p>
+        <p>La configuración (temas, herramientas, etc.) se guarda localmente en tu dispositivo.</p>
+      </div>
+
+      <div class="overlay-actions">
+        <button class="btn ghost" id="btnClosePrivacy">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Selector de temas (modal simple) -->
+  <div class="overlay" id="skinsOverlay" style="display:none">
+    <div class="box">
+      <h2>Temas</h2>
+      <div id="skinsGrid" class="skins-grid"></div>
+
+      <div class="overlay-actions">
+        <button class="btn ghost" id="btnCloseSkins">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Checkbox + Overlay: Coherencia Universal (evita conflictos con el router hash) -->
+  <input type="checkbox" id="coherenciaToggle" class="sr-only" />
+
+  <div class="overlay" id="coherenciaOverlay">
+    <div class="box">
+      <h2 id="coherenciaTitle">Coherencia Universal</h2>
+
+      <pre id="coherenciaBody" class="small coher-text"></pre>
+
+      <div class="overlay-actions">
+        <label class="btn ghost" for="coherenciaToggle">Cerrar</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tu JS -->
+  <script src="./galeria.js" defer></script>
+<script src="./export.js" defer></script>
+<script src="./studio.js" defer></script>
+<script src="./router.js" defer></script>
+<script src="./app.js" defer></script>
+
+  <script>
+    /* Mide header/footer y publica --hdrH / --ftrH (con guardia para navegadores viejos) */
+    (function(){
+      const root = document.documentElement;
+      const hdr = document.getElementById('siteHeader');
+      const ftr = document.getElementById('siteFooter');
+      function setHF(){
+        const hh = hdr ? Math.round(hdr.getBoundingClientRect().height) : 0;
+        const fh = ftr ? Math.round(ftr.getBoundingClientRect().height) : 0;
+        root.style.setProperty('--hdrH', hh + 'px');
+        root.style.setProperty('--ftrH', fh + 'px');
+      }
+      if ('ResizeObserver' in window) {
+        const ro = new ResizeObserver(setHF);
+        if(hdr) ro.observe(hdr);
+        if(ftr) ro.observe(ftr);
+      }
+      window.addEventListener('orientationchange', setHF);
+      window.addEventListener('resize', setHF);
+      window.addEventListener('load', setHF);
+      setHF();
+    })();
+  </script>
+
+  <!-- Filtro “olas de calor” para logos con clase .heat -->
+  <svg aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden">
+    <filter id="heat-waves">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012 0.02" numOctaves="1" seed="3">
+        <animate attributeName="baseFrequency"
+          dur="7.5s"
+          values="0.012 0.02; 0.02 0.04; 0.012 0.02; 0.012 0.02"
+          keyTimes="0;0.3;0.6;1"
+          calcMode="spline"
+          keySplines="0.4 0 0.2 1; 0.4 0 0.2 1; 0 0 1 1"
+          repeatCount="indefinite"/>
+      </feTurbulence>
+
+      <feDisplacementMap in="SourceGraphic" scale="0">
+        <animate attributeName="scale"
+          dur="7.5s"
+          values="0;28;0;0"
+          keyTimes="0;0.3;0.6;1"
+          calcMode="spline"
+          keySplines="0.4 0 0.2 1; 0.4 0 0.2 1; 0 0 1 1"
+          repeatCount="indefinite"/>
+      </feDisplacementMap>
+    </filter>
+  </svg>
+
+</body>
+</html>

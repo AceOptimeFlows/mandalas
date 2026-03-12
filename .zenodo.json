@@ -1,0 +1,23 @@
+{
+  "title": "Mand△L@s",
+  "upload_type": "software",
+  "access_right": "open",
+  "license": "mit",
+  "language": "spa",
+  "creators": [
+    {
+      "name": "Calvo Espinosa, Andrés"
+    }
+  ],
+  "description": "Mand△L@s es una aplicación web progresiva orientada a escritorio para crear mandalas con simetría radial, centros múltiples, capas, animación, galería local y exportación a PNG, SVG, PDF y vídeo. Funciona 100% en el navegador y puede instalarse como PWA.",
+  "keywords": [
+    "mandalas",
+    "PWA",
+    "simetría radial",
+    "dibujo digital",
+    "arte generativo",
+    "canvas",
+    "galería local",
+    "exportación"
+  ]
+}

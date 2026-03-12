@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "Si usas Mand△L@s, por favor cítalo con los metadatos de este archivo."
+title: "Mand△L@s"
+type: software
+abstract: >-
+  Mand△L@s es una aplicación web progresiva orientada a escritorio para crear
+  mandalas con simetría radial, centros múltiples, capas, animación, galería
+  local y exportación a PNG, SVG, PDF y vídeo. Funciona 100% en el navegador
+  y puede instalarse como PWA.
+authors:
+  - family-names: "Calvo Espinosa"
+    given-names: "Andrés"
+license: "MIT"
+keywords:
+  - mandalas
+  - PWA
+  - simetría radial
+  - dibujo digital
+  - arte generativo
+  - canvas
+  - galería local
+  - exportación
+
+# ORCID: https://orcid.org/0009-0005-4079-7418
+# version: "1.0.0"
+# doi: "10.5281/zenodo.18983778"
+# date-released: 2026-03-12
+# url: "https://github.com/AceOptimeFlows/mandalas"

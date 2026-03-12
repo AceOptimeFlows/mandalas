@@ -1,0 +1,615 @@
+/* ==========================================
+   Mand△L@s — OptimeFlow(s) Shell
+   Header + Footer inspirados en Pod😉CasTa (estilo OptimeFlow(s))
+   - Mantiene tu styles.css intacto
+   - Este archivo SOLO se encarga del “chrome” (header/footer/overlays)
+   ========================================== */
+
+/* ===========================
+   Variables del shell
+   =========================== */
+
+:root{
+  --glass: blur(18px) saturate(1.35);
+
+  /* Texto del shell (fijo para que se vea bien también en tema claro) */
+  --shell-ink: #eaf6ff;
+  --shell-muted: #a9c0d6;
+
+  --shell-border-subtle: rgba(255,255,255,0.16);
+
+  /* Blobs / acentos del shell */
+  --bg-blob-1: #22d3ee; /* cyan */
+  --bg-blob-2: #a78bfa; /* violet */
+  --bg-blob-3: #f472b6; /* pink */
+  --bg-blob-4: #a3e635; /* lime */
+
+  /* safe areas */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+}
+
+/* ===========================
+   Header (OptimeFlow(s) look)
+   =========================== */
+
+.app-header.brand-header{
+  position: sticky;
+  top: 0;
+  z-index: 10000;
+  isolation: isolate;
+
+  /* ✅ Igual que la app de referencia */
+  padding:
+    calc(6px + var(--safe-top))
+    calc(14px + var(--safe-right))
+    6px
+    calc(14px + var(--safe-left));
+
+  background:
+    radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--bg-blob-1) 22%, transparent), transparent 55%),
+    radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--bg-blob-2) 18%, transparent), transparent 55%),
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--bg-blob-3) 12%, transparent), transparent 60%),
+    linear-gradient(180deg, rgba(15,23,42,0.80), rgba(15,23,42,0.50));
+
+  backdrop-filter: var(--glass);
+  border-bottom: 1px solid var(--shell-border-subtle);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+
+  color: var(--shell-ink);
+}
+
+/* Respeta tu stacking cuando abres menús */
+.menu-open .app-header.brand-header{ z-index: 10001; }
+
+/* Estructura del header */
+.brand{
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+
+  /* ✅ Como referencia */
+  min-height: 40px;
+  position: relative;
+
+  font-weight: 700;
+  letter-spacing: .2px;
+}
+
+.brand-left,
+.brand-center,
+.brand-right{
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+.brand-left{ gap: 8px; }
+.brand-center{ justify-content: center; }
+.brand-right{ justify-content: flex-end; }
+
+/* =========================================================
+   ✅ FIX DEL TAMAÑO DEL HEADER (lo hacía más alto/ancho)
+   Tu styles.css base tiene #appLogo a 56–80px (muy grande).
+   Aquí lo forzamos a 32–48px como en la app de referencia.
+   ========================================================= */
+
+.brand-header #appLogo{
+  height: clamp(32px, 5vw, 48px);
+  width:  clamp(32px, 5vw, 48px);
+  border-radius: 10px;
+  object-fit: contain;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+/* Efecto heat (sobrescribe #appLogo.heat del styles.css base) */
+.brand-header #appLogo.heat{
+  filter:
+    url(#heat-waves)
+    drop-shadow(0 0 6px rgba(255,255,255,.35))
+    drop-shadow(0 0 18px color-mix(in srgb, var(--bg-blob-1) 35%, transparent));
+}
+
+/* Mantengo la clase por si la usas en otro logo */
+.brand-logo{
+  height: clamp(32px, 5vw, 48px);
+  width:  clamp(32px, 5vw, 48px);
+  border-radius: 10px;
+  object-fit: contain;
+  background: transparent;
+  border: none;
+}
+
+/* Efecto heat (fallback si no estuviera el id) */
+.brand-logo.heat{
+  filter:
+    url(#heat-waves)
+    drop-shadow(0 0 6px rgba(255,255,255,.35))
+    drop-shadow(0 0 18px color-mix(in srgb, var(--bg-blob-1) 35%, transparent));
+}
+
+/* Wordmark */
+.brand-word{
+  font-weight: 800;
+  font-size: clamp(1.6rem, 2.8vw, 2.0rem);
+  letter-spacing: .2px;
+  white-space: nowrap;
+}
+
+/* Neon wordmark (como referencia) */
+.brand-neon{
+  color: var(--shell-ink);
+  text-shadow:
+    0 0 8px rgba(255,255,255,.22),
+    0 0 22px color-mix(in srgb, var(--bg-blob-1) 25%, transparent),
+    0 0 34px color-mix(in srgb, var(--bg-blob-3) 18%, transparent);
+  animation: shellHue 12s linear infinite, shellGlow 3.2s ease-in-out infinite;
+}
+@supports (-webkit-background-clip:text){
+  .brand-neon{
+    background: conic-gradient(from 90deg, var(--bg-blob-1), var(--bg-blob-2), var(--bg-blob-3), var(--bg-blob-4), var(--bg-blob-1));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+@keyframes shellHue{ from{ filter:hue-rotate(0); } to{ filter:hue-rotate(360deg); } }
+@keyframes shellGlow{
+  0%,100%{ text-shadow:0 0 6px rgba(255,255,255,.22), 0 0 14px color-mix(in srgb, var(--bg-blob-1) 28%, transparent); }
+  50%{ text-shadow:0 0 10px rgba(255,255,255,.42), 0 0 24px color-mix(in srgb, var(--bg-blob-2) 34%, transparent); }
+}
+
+/* Tagline Mand△L@s (centrada REAL como en la app de referencia) */
+.brand-header .tagline{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+
+  display:flex;
+  align-items:center;
+  gap:0;
+  white-space:nowrap;
+  pointer-events:none;
+  text-align:center;
+}
+.glyph{ display:inline-block; line-height:1; transform-origin:center bottom; }
+
+.tagline-mandalas{ animation: mandFloat 6.4s ease-in-out infinite; }
+@keyframes mandFloat{
+  0%,100%{ transform:translate(-50%,-50%) translateY(0); }
+  50%{ transform:translate(-50%,-50%) translateY(-2px); }
+}
+
+/* Letras */
+.mand-core{
+  font-weight:900;
+  font-size:1.65rem;
+  color:#e9fbff;
+  text-shadow:
+    0 0 8px rgba(180,215,255,.55),
+    0 0 18px color-mix(in srgb, var(--bg-blob-1) 28%, transparent),
+    0 0 34px color-mix(in srgb, var(--bg-blob-2) 18%, transparent);
+  animation: mandHue 10s linear infinite;
+}
+.mand-soft{
+  font-weight:800;
+  font-size:1.55rem;
+  color:#ffffff;
+  opacity:.92;
+  text-shadow:
+    0 0 7px rgba(255,255,255,.20),
+    0 0 16px color-mix(in srgb, var(--bg-blob-3) 20%, transparent),
+    0 0 26px color-mix(in srgb, var(--bg-blob-1) 16%, transparent);
+  animation: mandPulse 4.8s ease-in-out infinite;
+}
+.mand-geo{
+  font-weight:900;
+  font-size:1.72rem;
+  margin:0 2px;
+  color:#bfe5ff;
+  text-shadow:
+    0 0 10px rgba(180,215,255,.55),
+    0 0 22px color-mix(in srgb, var(--bg-blob-2) 22%, transparent),
+    0 0 36px color-mix(in srgb, var(--bg-blob-1) 18%, transparent);
+}
+.mand-at{
+  font-weight:900;
+  font-size:1.62rem;
+  margin:0 2px;
+  color:#ffd1f0;
+  text-shadow:
+    0 0 10px rgba(255,180,240,.45),
+    0 0 22px color-mix(in srgb, var(--bg-blob-3) 28%, transparent),
+    0 0 36px color-mix(in srgb, var(--bg-blob-2) 18%, transparent);
+}
+
+@keyframes mandHue{ from{ filter:hue-rotate(0deg); } to{ filter:hue-rotate(360deg); } }
+@keyframes mandPulse{ 0%,100%{ opacity:.78; transform:translateY(0);} 50%{ opacity:.98; transform:translateY(-2px);} }
+
+.wobble{ animation: wobble 2.6s ease-in-out infinite; transform-origin: 50% 70%; }
+@keyframes wobble{
+  0%,100%{ transform: rotate(-4deg) translateY(0); }
+  50%{ transform: rotate(4deg) translateY(-1px); }
+}
+.pulse{ animation: pulseUp 2.4s ease-in-out infinite; }
+@keyframes pulseUp{
+  0%,100%{ transform: translateY(0) scale(1); }
+  50%{ transform: translateY(-2px) scale(1.04); }
+}
+
+/* Nav dentro del shell */
+.brand-header .nav{
+  min-width: 0; /* ✅ importante: permite que el grid no explote y haya scroll horizontal */
+  color: var(--shell-ink);
+}
+
+/* Colores de los links dentro del header */
+.brand-header .nav-link{
+  color: var(--shell-ink);
+}
+.brand-header .nav-link.active,
+.brand-header .nav-link:hover{
+  background: rgba(255,255,255,0.08);
+  text-decoration: none;
+}
+
+/* Menús desplegables: forzamos look “shell” (oscuro) */
+.brand-header .nav-menu{
+  background: rgba(15,23,42,0.92);
+  border: 1px solid var(--shell-border-subtle);
+  backdrop-filter: var(--glass);
+}
+.brand-header .nav-menu .item,
+.brand-header .nav-menu .item.chk{
+  background: rgba(15,23,42,0.72);
+  border: 1px solid rgba(255,255,255,0.10);
+}
+.brand-header .nav-menu .item:hover,
+.brand-header .nav-menu .item:focus-visible{
+  border-color: color-mix(in srgb, var(--bg-blob-1) 55%, white);
+}
+
+/* Botón ajustes tipo OptimeFlow(s) */
+.brand-header .icon-button{
+  border-radius:999px;
+  border:1px solid var(--shell-border-subtle);
+  background:
+    radial-gradient(circle at 30% 0%, rgba(255,255,255,0.16), transparent 55%),
+    linear-gradient(145deg, rgba(15,23,42,0.90), rgba(15,23,42,0.72));
+  padding:6px 10px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  box-shadow:0 8px 22px rgba(0,0,0,0.38), inset 0 1px 0 rgba(255,255,255,0.10);
+  transition: background .15s ease, border-color .15s ease, transform .08s ease, box-shadow .15s ease, filter .16s ease;
+}
+.brand-header .icon-button:hover{
+  background:
+    radial-gradient(circle at 30% 0%, rgba(255,255,255,0.22), transparent 55%),
+    linear-gradient(145deg,
+      color-mix(in srgb, var(--bg-blob-2) 18%, rgba(15,23,42,0.92)),
+      rgba(15,23,42,0.72)
+    );
+  border-color: color-mix(in srgb, var(--bg-blob-2) 65%, white);
+  box-shadow:0 10px 26px rgba(0,0,0,0.48), 0 0 20px color-mix(in srgb, var(--bg-blob-1) 24%, transparent);
+  transform:translateY(-1px);
+  filter:brightness(1.03);
+}
+.brand-header .icon-button:active{ transform:translateY(0); filter:brightness(0.98); }
+
+/* Asegura que el botón de settings no se “cuadre” por .nav .square */
+.brand-header #settingsMenuBtn.icon-button.square{
+  width: auto !important;
+  height: auto !important;
+  padding: 6px 10px !important;
+  border-radius: 999px !important;
+}
+
+/* Gear icon */
+.icon-gear{
+  width:18px;
+  height:18px;
+  border-radius:999px;
+  border:2px solid color-mix(in srgb, var(--bg-blob-2) 70%, white);
+  box-shadow:0 0 0 1px rgba(15,23,42,0.55);
+  position:relative;
+}
+.icon-gear::before,
+.icon-gear::after{
+  content:"";
+  position:absolute;
+  inset:4px;
+  border-radius:999px;
+  border:2px solid rgba(148,163,184,0.75);
+}
+.icon-gear::after{
+  inset:7px;
+  border-width:3px;
+  border-color: color-mix(in srgb, var(--bg-blob-1) 65%, white);
+}
+
+/* Responsive: en móvil escondemos el wordmark para dar aire */
+@media (max-width: 1024px) and (orientation: portrait){
+  .brand-word{ display:none; }
+  .brand{ gap: 8px; }
+  .mand-core{ font-size:1.45rem; }
+  .mand-soft{ font-size:1.35rem; }
+  .mand-geo{ font-size:1.5rem; }
+  .mand-at{  font-size:1.38rem; }
+}
+
+/* ===========================
+   Footer (OptimeFlow(s) look)
+   =========================== */
+
+.brand-footer{
+  background:
+    radial-gradient(circle at 0% 100%, color-mix(in srgb, var(--bg-blob-1) 16%, transparent), transparent 55%),
+    radial-gradient(circle at 100% 100%, color-mix(in srgb, var(--bg-blob-2) 14%, transparent), transparent 55%),
+    linear-gradient(0deg, rgba(15,23,42,0.80), rgba(15,23,42,0.50));
+
+  border-top: 1px solid var(--shell-border-subtle);
+
+  padding:
+    4px
+    calc(12px + var(--safe-right))
+    calc(4px + var(--safe-bottom))
+    calc(12px + var(--safe-left));
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+
+  color: var(--shell-muted);
+
+  box-shadow:0 -14px 32px rgba(0,0,0,.35);
+
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:40;
+
+  backdrop-filter: var(--glass);
+}
+
+.brand-footer strong{ color: var(--shell-ink); }
+.brand-footer .sep{ opacity:.6; }
+.brand-footer #footerAppName{ color: var(--shell-ink); }
+
+/* Botones del footer (mismo tamaño que referencia) */
+.brand-footer .btn.ghost{
+  background: rgba(15,23,42,0.70);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: var(--shell-ink);
+  height: 26px;
+  border-radius: 7px;
+  padding: 0 10px;
+  font-weight: 800;
+}
+
+/* Columnas */
+.brand-footer .footer-left{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  font-size:0.78rem;
+  min-width: 0;
+}
+.brand-footer .f-left-row1,
+.brand-footer .f-left-row2{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  min-width: 0;
+}
+
+/* Centro absoluto */
+.brand-footer .footer-center{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+}
+
+/* Derecha */
+.brand-footer .footer-right{
+  display:flex;
+  align-items:center;
+  gap: clamp(8px, 2vw, 18px);
+}
+
+/* Botón-ícono del centro */
+.footer-logo-btn{
+  display:inline-grid;
+  place-items:center;
+  padding:0;
+  border-radius:50%;
+  border:1px solid transparent;
+  background:transparent;
+  cursor:pointer;
+  transition: box-shadow .14s ease, transform .08s ease, filter .14s ease, border-color .12s ease, background-color .12s ease;
+  box-shadow:none;
+}
+.footer-logo-btn:hover,
+.footer-logo-btn:focus-visible{
+  background:
+    radial-gradient(circle at 20% 0%, rgba(255,255,255,0.16), transparent 55%),
+    linear-gradient(145deg, rgba(15,23,42,0.88), rgba(15,23,42,0.70));
+  border-color: color-mix(in srgb, var(--bg-blob-2) 60%, white);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.10);
+  outline: none;
+}
+.footer-logo-btn:active{ transform:scale(0.97); }
+
+/* Logo del footer */
+.footer-logo{
+  height: clamp(22px, 5vw, 28px);
+  width:  clamp(22px, 5vw, 28px);
+  object-fit:contain;
+  border-radius:10px;
+}
+
+/* Misma “oscilación” que la referencia */
+.tag-logo{
+  object-fit:contain;
+  transform-origin:center center;
+  animation:shellSway 5.5s ease-in-out infinite;
+  filter:
+    drop-shadow(0 0 6px rgba(255,255,255,.28))
+    drop-shadow(0 0 16px color-mix(in srgb, var(--bg-blob-1) 30%, transparent));
+}
+@keyframes shellSway{
+  0%{transform:rotate(-3deg);}
+  50%{transform:rotate(3deg);}
+  100%{transform:rotate(-3deg);}
+}
+
+/* “Heat” también en el logo del footer */
+.footer-logo.heat{
+  filter:
+    url(#heat-waves)
+    drop-shadow(0 0 6px rgba(255,255,255,.28))
+    drop-shadow(0 0 16px color-mix(in srgb, var(--bg-blob-1) 30%, transparent));
+}
+
+/* Responsive footer como referencia */
+@media (max-width: 600px) and (orientation: portrait){
+  .brand-footer{
+    display:grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items:center;
+    padding-left: calc(10px + var(--safe-left));
+    padding-right: calc(10px + var(--safe-right));
+    column-gap:8px;
+  }
+
+  .brand-footer .footer-left{ justify-self:flex-start; text-align:left; }
+  .brand-footer .footer-center{ position:static; transform:none; justify-self:center; }
+  .brand-footer .footer-right{
+    justify-self:flex-end;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:4px;
+  }
+
+  .footer-logo{
+    height: clamp(32px, 10vw, 40px);
+    width:  clamp(32px, 10vw, 40px);
+  }
+}
+
+/* ===========================
+   Overlays (look del shell)
+   =========================== */
+
+.overlay{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+
+  background:
+    radial-gradient(circle at 20% 10%, color-mix(in srgb, var(--bg-blob-2) 18%, transparent), transparent 55%),
+    radial-gradient(circle at 85% 20%, color-mix(in srgb, var(--bg-blob-1) 14%, transparent), transparent 60%),
+    rgba(10,16,28,0.62);
+
+  backdrop-filter: blur(22px) saturate(1.25);
+  z-index: 10120;
+}
+
+/* Compat con tu sistema: overlays por :target y por checkbox */
+.overlay:target{ display:flex; }
+#coherenciaToggle:checked + #coherenciaOverlay{ display:flex; }
+
+.overlay .box{
+  background:
+    radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--bg-blob-1) 18%, transparent), transparent 55%),
+    radial-gradient(circle at 120% 0%, color-mix(in srgb, var(--bg-blob-3) 16%, transparent), transparent 55%),
+    linear-gradient(145deg, rgba(15,23,42,0.88), rgba(15,23,42,0.68));
+
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,0.12);
+  max-width: min(980px, 94vw);
+  max-height: min(80vh, 640px);
+  padding:16px 16px 14px;
+
+  box-shadow: 0 26px 80px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.12) inset;
+  overflow:auto;
+
+  font-size:0.86rem;
+  color: var(--shell-ink);
+
+  backdrop-filter: var(--glass);
+}
+
+.overlay .box h2{ margin:0 0 8px; font-size:1.05rem; }
+.overlay .box .small{ font-size:0.83rem; color: var(--shell-muted); }
+
+.overlay-actions{
+  margin-top:10px;
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+}
+
+/* Licencia COF (pre) */
+.license-text{
+  margin:0;
+  white-space:pre-wrap;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size:0.8rem;
+  background: rgba(15,23,42,0.70);
+  border-radius:10px;
+  padding:10px;
+  border:1px solid rgba(255,255,255,0.10);
+  color: var(--shell-ink);
+}
+
+/* ===========================
+   Reduce motion
+   =========================== */
+@media (prefers-reduced-motion: reduce){
+  .brand-neon,
+  .tagline-mandalas,
+  .wobble,
+  .pulse,
+  .tag-logo{
+    animation: none !important;
+  }
+}
+/* Logo del header clicable */
+#siteHeader .brand-logo-link{
+  display:inline-flex;
+  align-items:center;
+  line-height:0;
+  text-decoration:none;
+}
+
+#siteHeader .brand-logo-link:hover,
+#siteHeader .brand-logo-link:focus-visible{
+  text-decoration:none;
+}
+
+/* Autor del footer en amarillo ocre + enlace */
+#siteFooter .footer-author-link{
+  color:#C49A2C;
+  font-weight:700;
+  text-decoration:none;
+  transition:color .15s ease;
+}
+
+#siteFooter .footer-author-link:hover,
+#siteFooter .footer-author-link:focus-visible{
+  color:#D9B14A;
+  text-decoration:underline;
+}

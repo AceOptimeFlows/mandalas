@@ -1,0 +1,24 @@
+{
+  "id": "/mandalas",
+  "name": "OptimeFlow(s) Mand△L@s",
+  "short_name": "Mand△L@s",
+  "description": "Creador interactivo de mandalas con simetría radial, capas, exportación PNG/SVG/PDF, galería y creador de libros. Funciona 100% en tu navegador como PWA.",
+  "start_url": "./?source=pwa",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "background_color": "#0b1220",
+  "theme_color": "#0b1220",
+  "orientation": "any",
+  "icons": [
+    { "src": "assets/img/logomandalas192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "assets/img/logomandalas512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
+    { "src": "assets/img/logo.png", "sizes": "1024x1024", "type": "image/png" }
+  ],
+  "shortcuts": [
+    { "name": "Lienzo",  "url": "./#/crear",   "description": "Abrir lienzo de dibujo" },
+    { "name": "Studio",  "url": "./#/studio",  "description": "Componer/Animar" },
+    { "name": "Galería", "url": "./#/galeria", "description": "Abrir galería" }
+  ],
+  "categories": ["art", "graphics", "productivity"]
+}
