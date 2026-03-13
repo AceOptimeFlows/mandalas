@@ -2755,14 +2755,14 @@ syncBrushOpacityUI();
   save(); render(); toast(t('Preset aplicado: Fuego')+' 🔥');
 });
 
-    colR.append(
-  el('div',{className:'field'},[ el('label',{},'Punta'), shapeSel ]),
-  el('div',{className:'field'},[ el('label',{},'Trazado'), patternSel ]),
+colR.append(
+  el('div',{className:'field'},[ el('label',{}, t('Punta')), shapeSel ]),
+  el('div',{className:'field'},[ el('label',{}, t('Trazado')), patternSel ]),
 
   el('div',{className:'field'},[
     el('label',{}, t('Fondo')),
     el('div',{className:'row'},[
-            el('input',{
+      el('input',{
         id:'bgColor',
         type:'color',
         className:'color-full',
@@ -2770,10 +2770,8 @@ syncBrushOpacityUI();
       }),
 
       el('button',{className:'btn small ghost', id:'bgDark'}, t('Oscuro')),
-el('button',{className:'btn small ghost', id:'bgLight'}, t('Claro')),
-el('button',{className:'btn small ghost', id:'bgVector'}, t('Vectorial'))
-
-
+      el('button',{className:'btn small ghost', id:'bgLight'}, t('Claro')),
+      el('button',{className:'btn small ghost', id:'bgVector'}, t('Vectorial'))
     ])
   ])
 );

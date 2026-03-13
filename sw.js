@@ -1,7 +1,7 @@
 // sw.js — PWA offline fuerte para OptimeFlow(s) Mand△L@s
 
 const APP_PREFIX  = 'mandalas';
-const APP_VERSION = 'v.1.0';
+const APP_VERSION = 'v_1.0';
 const APP_CACHE   = `${APP_PREFIX}-app-${APP_VERSION}`;
 const IMG_CACHE   = `${APP_PREFIX}-img-${APP_VERSION}`;
 const OTHER_CACHE = `${APP_PREFIX}-rt-${APP_VERSION}`;
